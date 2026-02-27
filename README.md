@@ -1,2 +1,2 @@
-# BepInEx-Mod-Template
-My own mod template I use for my mod development
+# ScavPrototype Sex Mod
+Sex Mod for Casu Unknown. Still WIP.
