@@ -1,2 +1,2 @@
-# ScavPrototypeSexMod
-A sex mod for Casualities: Unknown! Currently WIP...
+# BepInEx-Mod-Template
+My own mod template I use for my mod development
