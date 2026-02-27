@@ -144,10 +144,10 @@
     <EmbeddedResource Include="Assets\limbtemplate.png" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="UnrelatedAssets\smilingexpiedeath.png" />
-    <EmbeddedResource Include="UnrelatedAssets\sugarcoat.png" />
-    <EmbeddedResource Include="UnrelatedAssets\thinkingexpiedeath.png" />
-    <EmbeddedResource Include="UnrelatedAssets\waterexpiedeath.png" />
+    <EmbeddedResource Include="Assets\UnrelatedAssets\smilingexpiedeath.png" />
+    <EmbeddedResource Include="Assets\UnrelatedAssets\sugarcoat.png" />
+    <EmbeddedResource Include="Assets\UnrelatedAssets\thinkingexpiedeath.png" />
+    <EmbeddedResource Include="Assets\UnrelatedAssets\waterexpiedeath.png" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Assets\stdinfect.png" />
