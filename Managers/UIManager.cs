@@ -283,9 +283,9 @@ namespace ScavPrototypeSexMod.Managers
         {
             yield return null;
 
-            RectTransform rootRT = SharedState.wv.transform.Find("WorkoutsList").GetComponent<RectTransform>();
+            RectTransform rootRT = cam.woundView.gameObject.transform.Find("WorkoutsList").GetComponent<RectTransform>();
 
-            TextMeshProUGUI textmesh = SharedState.wv.transform.Find("WorkoutsList").Find("Plank").Find("Text (TMP)").GetComponent<TextMeshProUGUI>();
+            TextMeshProUGUI textmesh = cam.woundView.gameObject.transform.Find("WorkoutsList").Find("Plank").Find("Text (TMP)").GetComponent<TextMeshProUGUI>();
 
             if (SharedState.CurrentGender == SharedState.Gender.NonBinary)
                 yield break;
@@ -293,6 +293,12 @@ namespace ScavPrototypeSexMod.Managers
             if (SharedState.masturbateButton != null)
             {
                 SharedState.masturbateButton.SetActive(true);
+                yield break;
+            }
+
+            if (!rootRT)
+            {
+                Plugin.Log.LogError("RootRT is not defined.");
                 yield break;
             }
 

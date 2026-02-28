@@ -96,9 +96,9 @@ namespace ScavPrototypeSexMod
 
         // My BS
         public static bool funnystuff = true;
-        public static Sprite expieJoy = FileLoader.LoadEmbeddedSprite("ScavPrototypeSexMod.UnrelatedAssets.smilingexpiedeath.png");
-        public static Sprite expieWater = FileLoader.LoadEmbeddedSprite("ScavPrototypeSexMod.UnrelatedAssets.waterexpiedeath.png");
-        public static Sprite expieThink = FileLoader.LoadEmbeddedSprite("ScavPrototypeSexMod.UnrelatedAssets.thinkingexpiedeath.png");
-        public static Sprite sugarCoated = FileLoader.LoadEmbeddedSprite("ScavPrototypeSexMod.UnrelatedAssets.sugarcoat.png");
+        public static Sprite expieJoy = FileLoader.LoadEmbeddedSprite("ScavPrototypeSexMod.Assets.UnrelatedAssets.smilingexpiedeath.png");
+        public static Sprite expieWater = FileLoader.LoadEmbeddedSprite("ScavPrototypeSexMod.Assets.UnrelatedAssets.waterexpiedeath.png");
+        public static Sprite expieThink = FileLoader.LoadEmbeddedSprite("ScavPrototypeSexMod.Assets.UnrelatedAssets.thinkingexpiedeath.png");
+        public static Sprite sugarCoated = FileLoader.LoadEmbeddedSprite("ScavPrototypeSexMod.Assets.UnrelatedAssets.sugarcoat.png");
     }
 }

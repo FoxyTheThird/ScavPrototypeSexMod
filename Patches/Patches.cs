@@ -108,6 +108,13 @@ namespace ScavPrototypeSexMod.Patches
     [HarmonyPatch(typeof(PlayerCamera))]
     public static class MenuShenanigans
     {
+        [HarmonyPatch("Awake")]
+        [HarmonyPostfix]
+        public static void OnAwake(PlayerCamera __instance)
+        {
+            SharedState.pc = __instance;
+        }
+
         [HarmonyPatch("ToggleTradeMenu")]
         [HarmonyPostfix]
         public static void OnTradeMenuOpened(PlayerCamera __instance)
@@ -133,23 +140,18 @@ namespace ScavPrototypeSexMod.Patches
         [HarmonyPostfix]
         public static void PlayerCamera_Update_Postfix(PlayerCamera __instance)
         {
-            if (SharedState.wv == null)
-            {
-                return;
-            }
-
             if (SharedState.wv.workoutList.activeSelf)
             {
-                if (SharedState.masturbateButton == null)
+                if (!SharedState.masturbateButton)
                 {
                     __instance.StartCoroutine(UIManager.InitSexModWorkoutList(__instance));
                 }
-                else if (SharedState.masturbateButton != null && SharedState.masturbateButton.activeSelf == false)
+                else if (SharedState.masturbateButton && SharedState.masturbateButton.activeSelf == false)
                 {
                     SharedState.masturbateButton.SetActive(true);
                 }
             }
-            else if (!__instance.woundView.gameObject.activeSelf && SharedState.masturbateButton != null && SharedState.masturbateButton.activeSelf == true)
+            else if (!__instance.gameObject.activeSelf && SharedState.masturbateButton && SharedState.masturbateButton.activeSelf)
             {
                 SharedState.masturbateButton.SetActive(false);
             }
@@ -528,33 +530,16 @@ namespace ScavPrototypeSexMod.Patches
                 age = Mathf.Clamp(age, 18, 40);
             }
 
+            [HarmonyPatch(typeof(WoundView), "Awake")]
             [HarmonyPostfix]
-            public static void Postfix(WoundView __instance)
+            public static void AddWoundView(WoundView __instance)
             {
-                SharedState.wv = __instance;
-                if (__instance.gameObject.activeSelf)
+                if (SharedState.wv != __instance)
                 {
-                    Plugin.Log.LogWarning("WoundView Exists! Setting it to shared state.");
+                    SharedState.wv = __instance;
                 }
             }
         }
-
-        // For the Shared States
-        public class SharedStates
-        {
-            [HarmonyPatch(typeof(PlayerCamera), "Awake")]
-            [HarmonyPostfix]
-            public static void AddCamera(PlayerCamera __instance)
-            {
-                if (SharedState.pc != __instance)
-                {
-                    SharedState.pc = __instance;
-                }
-            }
-        }
-
-        
-        
     }
 
 }

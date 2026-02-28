@@ -26,7 +26,7 @@ namespace ScavPrototypeSexMod.Managers
             SharedState.CondomInInventory = false;
             SharedState.WearingCondom = false;
             SharedState.Horniness = 100f;
-            SharedState.Hardness = 0f;
+            SharedState.Hardness = 1f;
         }
 
         public static void PickSTD()
@@ -38,10 +38,8 @@ namespace ScavPrototypeSexMod.Managers
             SharedState.stdTypes[randomKey] = true;
         }
 
-        public static IEnumerator ApplySTD(int chara)
+        public static void ApplySTD(int chara)
         {
-            yield return null;
-
             switch (chara)
             {
                 case 0: // Expie
@@ -52,6 +50,10 @@ namespace ScavPrototypeSexMod.Managers
                         SharedState.HasSTD = true;
                         PickSTD();
                     }
+                    else
+                    {
+                        Plugin.Log.LogInfo("You just narrowly avoided getting an STD.");
+                    }
                     break;
                 case 1: // Milky
                     if (UnityEngine.Random.value <= 0.35f)
@@ -59,6 +61,10 @@ namespace ScavPrototypeSexMod.Managers
                         Plugin.Log.LogInfo("STD Time!");
                         SharedState.HasSTD = true;
                         PickSTD();
+                    }
+                    else
+                    {
+                        Plugin.Log.LogInfo("You just narrowly avoided getting an STD.");
                     }
                     break;
                 case 2: // Dune
@@ -68,6 +74,10 @@ namespace ScavPrototypeSexMod.Managers
                         Plugin.Log.LogInfo("STD Time!");
                         SharedState.HasSTD = true;
                         PickSTD();
+                    }
+                    else
+                    {
+                        Plugin.Log.LogInfo("You just narrowly avoided getting an STD.");
                     }
                     break;
                 default:
@@ -183,13 +193,12 @@ namespace ScavPrototypeSexMod.Managers
                 }
 
                 // Checking if you aren't wearing a condom, or have one in your inventory
-                if (!SharedState.WearingCondom)
+                if (!SharedState.WearingCondom || !condomInInv)
                 {
-                    cam.StartCoroutine(ApplySTD(SharedState.curTrader.character));
-                }
-                else if (!condomInInv)
-                {
-                    cam.StartCoroutine(ApplySTD(SharedState.curTrader.character));
+                    Plugin.Log.LogWarning("Going in without a condom...");
+                    cam.body.immunity -= 15f;
+                    //cam.StartCoroutine(ApplySTD(SharedState.curTrader.character));
+                    ApplySTD(SharedState.curTrader.character);
                 }
                 else
                 {
@@ -203,7 +212,9 @@ namespace ScavPrototypeSexMod.Managers
                     {
                         Plugin.Log.LogInfo("Condom Broke!");
 
-                        cam.StartCoroutine(ApplySTD(SharedState.curTrader.character));
+                        cam.body.immunity -= 15f;
+                        //cam.StartCoroutine(ApplySTD(SharedState.curTrader.character));
+                        ApplySTD(SharedState.curTrader.character);
                     }
                 }
 
@@ -219,6 +230,17 @@ namespace ScavPrototypeSexMod.Managers
                     SharedState.curTrader.reputation += UnityEngine.Random.Range(50f, 55f);
                     cam.body.forcedSleepQuality = new Body.SleepQuality?(Body.SleepQuality.Good);
                     Plugin.Log.LogInfo(cam.body.curSleep);
+
+                    if (cam.tradeMenu.activeSelf)
+                    {
+                        cam.ToggleTradeMenu();
+
+                        yield return null;
+
+                        cam.radialOpen = false;
+                        cam.radialMenu.gameObject.SetActive(false);
+                        cam.CloseContainer();
+                    }
 
                     if (cam.craftingPanel.activeSelf)
                     {
@@ -300,8 +322,8 @@ namespace ScavPrototypeSexMod.Managers
                                 cam.body.armsAnimator.Play("Grounded");
                                 field?.SetValue(cam.body, false);
                                 cam.body.bodyAnimator.SetBool("exercising", false);
-                                SharedState.pc.StopCoroutine(SharedState.mCoroutine);
-                                yield return null;
+
+                                yield break;
                             }
 
                             if (SharedState.Horniness > 1f)
@@ -317,8 +339,8 @@ namespace ScavPrototypeSexMod.Managers
                                 cam.body.armsAnimator.StopPlayback();
                                 cam.body.armsAnimator.Play("Grounded");
                                 field?.SetValue(cam.body, false);
-                                SharedState.pc.StopCoroutine(SharedState.mCoroutine);
-                                break;
+
+                                yield break;
                             }
 
                             yield return null;
@@ -329,10 +351,9 @@ namespace ScavPrototypeSexMod.Managers
                         cam.ToggleWoundView(true);
                         cam.PlayUISound(PlayerCamera.UISoundType.Deny, 1f);
                         cam.UseFailUnhappiness();
-                        SharedState.pc.StopCoroutine(SharedState.mCoroutine);
-                        yield return null;
+                        yield break;
                     }
-                    
+
                     break;
                 default:
                     Plugin.Log.LogInfo("Something went wrong.");
