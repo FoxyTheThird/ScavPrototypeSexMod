@@ -226,6 +226,24 @@ namespace ScavSexMod.Helpers
             return cusFont;
         }
 
+        public static AnimationClip[] LoadEmbeddedBundle(byte[] bundleData)
+        {
+            AssetBundle bundle = AssetBundle.LoadFromMemory(bundleData);
+            if (bundle == null)
+            {
+                Debug.LogError("Failed to load AssetBundle from embedded data!");
+                return null;
+            }
+
+            AnimationClip armsJerk = bundle.LoadAsset<AnimationClip>("ArmsJerk");
+            AnimationClip armsJerkAction = bundle.LoadAsset<AnimationClip>("ArmsJerkAction");
+            AnimationClip experimentJerkSit = bundle.LoadAsset<AnimationClip>("ExperimentJerkSit");
+
+            bundle.Unload(false); // keep assets
+
+            return new AnimationClip[] { armsJerk, armsJerkAction, experimentJerkSit };
+        }
+
         public static void LoadLocale(string localeCode)
         {
             try

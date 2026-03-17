@@ -31,9 +31,10 @@ namespace ScavPrototypeSexMod.Managers
         private const string PREF_KEY = "GenderSelection";
 
         // Creates the gender radio check boxes on the main menu
+        // Now that the Gender Sex Changer is inside the run settings box, make it look pretty!
         public static void CreateGenderRadios()
         {
-            var canvas = GameObject.Find("Canvas")?.transform;
+            var canvas = GameObject.Find("Canvas").transform.Find("RunSettings");
             if (canvas == null) return;
 
             var root = new GameObject("GenderOptions", typeof(RectTransform));
@@ -43,7 +44,7 @@ namespace ScavPrototypeSexMod.Managers
             rect.anchorMin = new Vector2(0, 1);
             rect.anchorMax = new Vector2(0, 1);
             rect.pivot = new Vector2(0, 1);
-            rect.anchoredPosition = new Vector2(25, -225);
+            rect.anchoredPosition = new Vector2(25, -375);
 
             var layout = root.AddComponent<VerticalLayoutGroup>();
             layout.spacing = 8;
@@ -64,7 +65,7 @@ namespace ScavPrototypeSexMod.Managers
                 toggleGO.transform.SetParent(root.transform, false);
 
                 var rowRect = toggleGO.GetComponent<RectTransform>();
-                rowRect.sizeDelta = new Vector2(220, 26);
+                rowRect.sizeDelta = new Vector2(110, 26);
 
                 var rowImage = toggleGO.GetComponent<Image>();
                 rowImage.color = new Color(0, 0, 0, 0);

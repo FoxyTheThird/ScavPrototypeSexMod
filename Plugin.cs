@@ -36,8 +36,8 @@ namespace ScavPrototypeSexMod
             Instance = this;
             Log = Logger;
 
-            //UnityEngine.Screen.SetResolution(1366, 768, false);
-            UnityEngine.Screen.SetResolution(1920, 1080, false);
+            UnityEngine.Screen.SetResolution(1366, 768, false);
+            //UnityEngine.Screen.SetResolution(1920, 1080, false);
             //UnityEngine.Screen.SetResolution(2400, 1600, true);
 
             //UnityEngine.Screen.fullScreen = true;

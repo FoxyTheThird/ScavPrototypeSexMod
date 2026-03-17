@@ -1,4 +1,5 @@
-﻿using System;
+﻿using ScavSexMod.Helpers;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -309,16 +310,42 @@ namespace ScavPrototypeSexMod.Managers
 
                         cam.body.bodyAnimator.SetBool("exercising", true);
                         field?.SetValue(cam.body, true);
-                        cam.body.bodyAnimator.Play("ExperimentPushups");
-                        cam.body.armsAnimator.Play("ArmsPushups");
+
+                        // TODO: FIGURE OUT WHY THE ANIMATIONS DON'T STOP WHEN MAGNITUDE.VELOCITY IS OVER 1.
+                        // TODO: THAT MAY BE A PROBLEM.
+                        AnimatorOverrideController bodyOverride = new AnimatorOverrideController(cam.body.bodyAnimator.runtimeAnimatorController);
+                        bodyOverride["ExperimentSit"] = SharedState.experimentJerkSit;
+                        cam.body.bodyAnimator.runtimeAnimatorController = bodyOverride;
+
+                        AnimatorOverrideController armsOverride = new AnimatorOverrideController(cam.body.armsAnimator.runtimeAnimatorController);
+                        armsOverride["ArmsSit"] = SharedState.armsJerk;
+                        cam.body.armsAnimator.runtimeAnimatorController = armsOverride;
+
+                        cam.body.bodyAnimator.Play("ExperimentSit");
+                        cam.body.armsAnimator.Play("ArmsSit");
+
+                        Debug.Log("--- Body Animator Clips ---");
+                        foreach (var clip in cam.body.bodyAnimator.runtimeAnimatorController.animationClips)
+                        {
+                            Debug.Log(clip.name);
+                        }
+
+                        Debug.Log("--- Arms Animator Clips ---");
+                        foreach (var clip in cam.body.armsAnimator.runtimeAnimatorController.animationClips)
+                        {
+                            Debug.Log(clip.name);
+                        }
+
+                        /*cam.body.bodyAnimator.Play("ExperimentPushups");
                         cam.body.bodyAnimator.SetFloat("WorkoutSpeed", 1f + cam.body.skills.RESFrom10 * 0.07f);
-                        cam.body.armsAnimator.SetFloat("WorkoutSpeed", 1f + cam.body.skills.RESFrom10 * 0.07f);
+                        cam.body.armsAnimator.SetFloat("WorkoutSpeed", 1f + cam.body.skills.RESFrom10 * 0.07f);*/
 
                         while (cam.body.bodyAnimator.GetBool("exercising"))
                         {
                             if (cam.body.rb.velocity.magnitude > 1f || !cam.body.standing || cam.body.attackCooldown > 0f)
                             {
                                 cam.body.armsAnimator.StopPlayback();
+                                cam.body.bodyAnimator.StopPlayback();
                                 cam.body.armsAnimator.Play("Grounded");
                                 field?.SetValue(cam.body, false);
                                 cam.body.bodyAnimator.SetBool("exercising", false);
@@ -326,9 +353,13 @@ namespace ScavPrototypeSexMod.Managers
                                 yield break;
                             }
 
-                            if (SharedState.Horniness > 1f)
+                            if (SharedState.Horniness > 40f)
                             {
-                                SharedState.Horniness = Mathf.Max(SharedState.Horniness - Time.deltaTime * 0.25f, 0f);
+                                SharedState.Horniness = Mathf.Max(SharedState.Horniness - (1f - SharedState.Horniness / 100f) * 0.5f * Time.deltaTime, 0f);
+
+                                //float workoutSpeed = 1f + (1f - SharedState.Horniness / 100f) * 2f;
+                                //cam.body.bodyAnimator.SetFloat("WorkoutSpeed", workoutSpeed);
+                                //cam.body.armsAnimator.SetFloat("WorkoutSpeed", workoutSpeed);
                             }
                             else
                             {
@@ -336,9 +367,12 @@ namespace ScavPrototypeSexMod.Managers
                                 cam.body.happiness += 45;
 
                                 cam.body.bodyAnimator.SetBool("exercising", false);
+                                cam.body.bodyAnimator.StopPlayback();
                                 cam.body.armsAnimator.StopPlayback();
                                 cam.body.armsAnimator.Play("Grounded");
                                 field?.SetValue(cam.body, false);
+
+                                Orgasm(cam);
 
                                 yield break;
                             }
@@ -359,6 +393,19 @@ namespace ScavPrototypeSexMod.Managers
                     Plugin.Log.LogInfo("Something went wrong.");
                     break;
             }
+        }
+
+        // Do what is said here, orgasm during trader sex and also during masturbation.
+        public static void Orgasm(PlayerCamera cam)
+        {
+            // Probably work it up from slow stroking to fast stroking (lerp animation speed over a set amount of time) then make the horny go straight to zero
+            // Maybe spawn cum particles and add a moodle for said orgasming? Possibly.
+
+            cam.body.talker.Talk("F- fuuck!!~", null, true, false);
+
+            //SharedState.Horniness = Mathf.Max(SharedState.Horniness - (3f - SharedState.Horniness / 40f) * 1f * Time.deltaTime, 0f);
+            //cam.body.bodyAnimator.SetFloat("WorkoutSpeed", 1f + Mathf.Clamp01((SharedState.Horniness / 40f)) * (2.5f - 1f));
+            //cam.body.armsAnimator.SetFloat("WorkoutSpeed", 1f + Mathf.Clamp01((SharedState.Horniness / 40f)) * (2.5f - 1f));
         }
     }
 

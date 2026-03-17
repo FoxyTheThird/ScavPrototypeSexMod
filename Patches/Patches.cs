@@ -140,7 +140,7 @@ namespace ScavPrototypeSexMod.Patches
         [HarmonyPostfix]
         public static void PlayerCamera_Update_Postfix(PlayerCamera __instance)
         {
-            if (SharedState.wv.workoutList.activeSelf)
+            if (SharedState.wv && SharedState.wv.workoutList.activeSelf)
             {
                 if (!SharedState.masturbateButton)
                 {
@@ -251,14 +251,7 @@ namespace ScavPrototypeSexMod.Patches
                     SharedState.hCoroutine = __instance.StartCoroutine(SexManager.HornyRoutine(__instance));
                 }
 
-                if (SharedState.wv == null)
-                {
-                    SharedState.wv = UnityEngine.Object.FindObjectOfType<WoundView>();
-                }
-                else
-                {
-                    STDManager.UpdateSTD();
-                }
+                STDManager.UpdateSTD();
             }
         }
     }
@@ -530,11 +523,11 @@ namespace ScavPrototypeSexMod.Patches
                 age = Mathf.Clamp(age, 18, 40);
             }
 
-            [HarmonyPatch(typeof(WoundView), "Awake")]
+            [HarmonyPatch(typeof(WoundView), "Update")]
             [HarmonyPostfix]
             public static void AddWoundView(WoundView __instance)
             {
-                if (SharedState.wv != __instance)
+                if (SharedState.wv == null)
                 {
                     SharedState.wv = __instance;
                 }

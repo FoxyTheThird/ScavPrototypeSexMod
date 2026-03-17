@@ -10,7 +10,7 @@ using UnityEngine.UI;
 
 namespace ScavPrototypeSexMod
 {
-    public static class SharedState
+    struct SharedState
     {
         public static Dictionary<string, GameObject> ModPrefabs = new Dictionary<string, GameObject>();
 
@@ -67,7 +67,7 @@ namespace ScavPrototypeSexMod
 
         // Fuckass persistent variables for my whiny functions
         public static PlayerCamera pc;
-        public static WoundView wv;
+        public static WoundView wv = null;
         public static Body bod;
 
         // Sprite replacements
@@ -76,6 +76,14 @@ namespace ScavPrototypeSexMod
         public static Sprite[,] spritesLimbUI = new Sprite[2, 15];
         public static string[] limbName = new string[32];
         public static int limbCount = 0;
+
+        // Animation Clips for da animations
+        internal static byte[] bundleBytes = FileLoader.LoadFileBytes("ScavPrototypeSexMod.Assets.Animations.animations.bundle").Item2;
+        internal static AnimationClip[] clips = FileLoader.LoadEmbeddedBundle(bundleBytes);
+
+        public static AnimationClip armsJerk = clips[0];
+        public static AnimationClip armsJerkAction = clips[1];
+        public static AnimationClip experimentJerkSit = clips[2];
 
         // For values within the limb list
         // -1 means don't sprite replace for that limb.

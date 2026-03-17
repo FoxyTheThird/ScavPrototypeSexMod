@@ -8,6 +8,11 @@ using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
 
+/* What if we added a new aphordisaic gas or liquid, that gives you the horny moodle
+
+   Maybe.
+*/
+
 namespace ScavPrototypeSexMod.Managers
 {
     public static class MoodleHandler
