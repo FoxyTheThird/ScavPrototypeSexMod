@@ -29,7 +29,7 @@ namespace ScavPrototypeSexMod.Managers
         public static ItemInfo AddItemInfo(ItemInfo __instance, string name, string tags, string category, string qualities, string desiredWearLimb, string wearSlotID, string description = "", float? weight = 1f, float? slotRot = 0f, float? qualityAmt = 1f, bool? scaleWeightWithCond = false, bool? destroyAtZeroCond = false, int? recmin = 1, int? value = 0, bool? ignoreDepression = false, byte? decayInfo = 0, float? decayMinutes = 0f, bool? usable = false, bool? combinable = false, bool? usableOnLimb = false, bool? usableWithLMB = false, ItemInfo.Use useAction = null, ItemInfo.UseLimb useLimbAction = null, bool? autoAttack = false, bool? onlyHoldInHands = false, bool? wearable = false, float? wearableArmor = 1f, float? wearableLossMult = 0f, float? wearableIsolation = 0f, int? wearableVisOffset = 5, float? jumpMult = 0f, float? rotSpeed = 0f)
         {
             List<CraftingQuality> qualitiesList = new List<CraftingQuality>();
-            qualitiesList.Add(new CraftingQuality(qualities, qualityAmt ?? 1f));
+            qualitiesList.Add(new CraftingQuality(qualities ?? null, qualityAmt ?? 1f));
             // oh btw inner crafting quality is optional, can also use string ^
 
             Recognition rec = new Recognition(recmin ?? 1);
@@ -152,12 +152,18 @@ namespace ScavPrototypeSexMod.Managers
                 description: "A condom used to negate risk of STDs.", desiredWearLimb: null, wearSlotID: null,
                 weight: 0.15f, value: 30, slotRot: 0f, usable: true, useAction: UseCondom, destroyAtZeroCond: true, category: "utility", recmin: 5);
 
+            var lubeinfo = new LiquidItemInfo();
+            var lubeitem = AddItemInfo(lubeinfo, name: "lube?", tags: "", category: "water", qualities: null,
+                description: "May or may not be lube?", desiredWearLimb: null, wearSlotID: null,
+                weight: 0.75f, value: 10, slotRot: 0f, usable: true, useAction: UseLube, destroyAtZeroCond: false, recmin: 5);
+
             FluidManager fluidManager = new FluidManager();
             fluidManager.RegisterFluids();
-            Item lube = fluidManager.lube;
 
-            var items = new List<Item> { sextoy, viagra, condom, lube };
-            var infos = new List<ItemInfo> { sextoyitem, viagraitem, condomitem, FluidManager.liquids[1] };
+            lubeinfo.capacity = fluidManager.liquidCapacities.Sum();
+
+            var items = new List<Item> { sextoy, viagra, condom, fluidManager.lube };
+            var infos = new List<ItemInfo> { sextoyitem, viagraitem, condomitem, lubeitem };
 
             for (int i = 0; i < items.Count; i++)
             {
@@ -170,6 +176,9 @@ namespace ScavPrototypeSexMod.Managers
 
                 Plugin.Log.LogInfo("Registered item " + item.name + " with id: " + item.id + "!");
             }
+
+            var container = fluidManager.lube.gameObject.AddComponent<WaterContainerItem>();
+            container.stack = fluidManager.lubeContents;
         }
 
         // For the viagra
@@ -268,19 +277,6 @@ namespace ScavPrototypeSexMod.Managers
             Plugin.Log.LogWarning("DO the thing here.");
 
             body.talker.TalkDelayed(0.5f, "That tasted terrible...", null, true, false);
-        }
-
-        private static IEnumerator CondomForTrader(Body body, Item item)
-        {
-            Plugin.Log.LogInfo("Keeping track of condom in inventory.");
-            while (body.GetAllItems().Contains(item))
-            {
-                SharedState.CondomInInventory = true;
-                yield return new WaitForSeconds(0.1f);
-            }
-
-            item.condition = 0f;
-            SharedState.CondomInInventory = false;
         }
 
         // For the sex toy

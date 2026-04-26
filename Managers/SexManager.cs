@@ -295,7 +295,11 @@ namespace ScavPrototypeSexMod.Managers
         {
             Plugin.Log.LogInfo("Simulate Masturbation...");
 
-            if (cam.body.bodyAnimator.GetBool("exercising"))
+            Orgasm(cam);
+
+            yield return null;
+
+            /*if (cam.body.bodyAnimator.GetBool("exercising"))
                 yield break;
 
             SharedState.MoreWorkoutTypes workoutType = SharedState.MoreWorkoutTypes.Masturbate;
@@ -334,13 +338,13 @@ namespace ScavPrototypeSexMod.Managers
                         foreach (var clip in cam.body.armsAnimator.runtimeAnimatorController.animationClips)
                         {
                             Debug.Log(clip.name);
-                        }
+                        }*/
 
                         /*cam.body.bodyAnimator.Play("ExperimentPushups");
                         cam.body.bodyAnimator.SetFloat("WorkoutSpeed", 1f + cam.body.skills.RESFrom10 * 0.07f);
                         cam.body.armsAnimator.SetFloat("WorkoutSpeed", 1f + cam.body.skills.RESFrom10 * 0.07f);*/
 
-                        while (cam.body.bodyAnimator.GetBool("exercising"))
+                        /*while (cam.body.bodyAnimator.GetBool("exercising"))
                         {
                             if (cam.body.rb.velocity.magnitude > 1f || !cam.body.standing || cam.body.attackCooldown > 0f)
                             {
@@ -392,7 +396,7 @@ namespace ScavPrototypeSexMod.Managers
                 default:
                     Plugin.Log.LogInfo("Something went wrong.");
                     break;
-            }
+            }*/
         }
 
         // Do what is said here, orgasm during trader sex and also during masturbation.
@@ -401,11 +405,43 @@ namespace ScavPrototypeSexMod.Managers
             // Probably work it up from slow stroking to fast stroking (lerp animation speed over a set amount of time) then make the horny go straight to zero
             // Maybe spawn cum particles and add a moodle for said orgasming? Possibly.
 
-            cam.body.talker.Talk("F- fuuck!!~", null, true, false);
+            if (cam == null)
+            {
+                Plugin.Log.LogError("Cam is null! Cannot proceed.");
+            }
+            else
+            {
+                cam.body.talker.Talk("F- fuuck!!~", null, true, false);
 
-            //SharedState.Horniness = Mathf.Max(SharedState.Horniness - (3f - SharedState.Horniness / 40f) * 1f * Time.deltaTime, 0f);
-            //cam.body.bodyAnimator.SetFloat("WorkoutSpeed", 1f + Mathf.Clamp01((SharedState.Horniness / 40f)) * (2.5f - 1f));
-            //cam.body.armsAnimator.SetFloat("WorkoutSpeed", 1f + Mathf.Clamp01((SharedState.Horniness / 40f)) * (2.5f - 1f));
+                if (SharedState.cpart == null)
+                {
+                    SharedState.cpart = ParticleManager.makePiss();
+                }
+
+                /*var ps = SharedState.cpart.GetComponent<ParticleSystem>();
+
+                Debug.Log("Emission: " + ps.emission.rateOverTime.constant);
+                Debug.Log("Particles alive: " + ps.particleCount);
+                Debug.Log("MaxParticles: " + ps.main.maxParticles);
+                Debug.Log("StartSize: " + ps.main.startSize.constant);
+                Debug.Log("IsPlaying: " + ps.isPlaying);*/
+
+                // Maybe use a havingSex bool for a more robust check???
+                if (cam.body.bodyAnimator.GetBool("exercising"))
+                {
+                    //SharedState.Horniness = Mathf.Max(SharedState.Horniness - (3f - SharedState.Horniness / 40f) * 1f * Time.deltaTime, 0f);
+                    //cam.body.bodyAnimator.SetFloat("WorkoutSpeed", 1f + Mathf.Clamp01((SharedState.Horniness / 40f)) * (2.5f - 1f));
+                    //cam.body.armsAnimator.SetFloat("WorkoutSpeed", 1f + Mathf.Clamp01((SharedState.Horniness / 40f)) * (2.5f - 1f));
+
+                    SharedState.cpart.GetComponent<ParticleSystem>().Emit(20);
+                    SharedState.cpart.transform.position = cam.transform.position;
+                }
+                else
+                {
+                    SharedState.cpart.GetComponent<ParticleSystem>().Emit(40);
+                    SharedState.cpart.transform.position = cam.transform.position;
+                }
+            }
         }
     }
 

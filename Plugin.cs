@@ -1,18 +1,20 @@
-﻿using BepInEx.Logging;
-using BepInEx;
+﻿using BepInEx;
+using BepInEx.Logging;
 using HarmonyLib;
+using ScavPrototypeSexMod.Managers;
+using ScavPrototypeSexMod.Patches;
+using ScavSexMod.Helpers;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Reflection;
+using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
-using System.Reflection;
-using ScavSexMod.Helpers;
-using System.IO;
-using System.Security.Cryptography;
 using TMPro;
 using UnityEngine;
-using ScavPrototypeSexMod.Managers;
+using UnityEngine.SceneManagement;
 
 namespace ScavPrototypeSexMod
 {
@@ -42,6 +44,8 @@ namespace ScavPrototypeSexMod
 
             //UnityEngine.Screen.fullScreen = true;
 
+            SceneManager.sceneUnloaded += OnSceneUnload;
+
             EmbeddedLoader.Init();
 
             heartbeatClip = FileLoader.LoadEmbeddedAudio(
@@ -67,8 +71,25 @@ namespace ScavPrototypeSexMod
             SexManager.Initialize();
             STDManager.Initialize();
             NetPlayManager.Initialize();
+            ParticleManager.Initialize();
 
             new Harmony(Guid).PatchAll();
+        }
+
+        private void OnSceneUnload(Scene scene)
+        {
+            Plugin.Log.LogInfo($"Scene unloaded: {scene.name}");
+
+            if (MoreFunnyStuff.audSource != null)
+            {
+                MoreFunnyStuff.audSource.Stop();
+                GameObject.Destroy(MoreFunnyStuff.audSource.gameObject);
+                MoreFunnyStuff.audSource = null;
+            }
+
+            MoreFunnyStuff._initialized = false;
+            MoreFunnyStuff._startedPlaying = false;
+            SceneManager.sceneUnloaded -= OnSceneUnload;
         }
     }
 }

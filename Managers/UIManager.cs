@@ -168,10 +168,8 @@ namespace ScavPrototypeSexMod.Managers
         }
 
         // Creates the horny stat in the wound view and the gender.
-        public static IEnumerator InitSexModWoundView(PlayerCamera cam)
+        public static IEnumerator InitSexModWoundView(GameObject woundView)
         {
-            GameObject woundView = cam.woundView;
-
             // Gender stuffs
             if (SharedState.genderRoot == null)
             {
@@ -230,14 +228,34 @@ namespace ScavPrototypeSexMod.Managers
                 if (SharedState.horninessRoot == null)
                 {
                     Transform statMenu = null;
+
                     yield return new WaitUntil(() =>
                     {
                         statMenu = woundView.transform.Find("StatMenu");
+
+                        Plugin.Log.LogInfo($"[WoundView] Searching StatMenu... found: {statMenu != null}");
+
                         return statMenu != null;
                     });
 
+                    Plugin.Log.LogInfo("[WoundView] StatMenu acquired");
+
                     RectTransform rootRT = statMenu.GetComponent<RectTransform>();
-                    TextMeshProUGUI TextMeshGUI = statMenu.transform.Find("Image/OxyText").GetComponent<TextMeshProUGUI>();
+
+                    Transform oxyTransform = null;
+
+                    yield return new WaitUntil(() =>
+                    {
+                        oxyTransform = statMenu.Find("OxyText");
+
+                        Plugin.Log.LogInfo($"[WoundView] Searching OxyText... found: {oxyTransform != null}");
+
+                        return oxyTransform != null && oxyTransform.GetComponent<TextMeshProUGUI>() != null;
+                    });
+
+                    Plugin.Log.LogInfo("[WoundView] OxyText fully ready");
+
+                    TextMeshProUGUI TextMeshGUI = oxyTransform.GetComponent<TextMeshProUGUI>();
 
                     // IMAGE
                     GameObject imgGO = new GameObject("SexModStatRoot");

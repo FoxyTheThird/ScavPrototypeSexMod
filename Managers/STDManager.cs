@@ -51,7 +51,7 @@ namespace ScavPrototypeSexMod.Managers
                 if (!hasIt) continue;
 
                 // I really have no idea what the fuck this math is about
-                float xOffset = (1 * 50f - (6 - 1) * 25f) * (SharedState.wv.limbImageLerp[2] * 0.8f + 0.2f);
+                float xOffset = ((float)4 * 50f - (float)(6 - 1) * 25f) * (SharedState.wv.limbImageLerp[2] * 0.8f + 0.2f);
                 Vector2 offset = new Vector2(xOffset, xOffset * 0.2f);
                 Vector2 targetPos = offset + (Vector2)SharedState.wv.limbImages[2].transform.position;
 
@@ -69,7 +69,7 @@ namespace ScavPrototypeSexMod.Managers
                         SharedState.wv.limbImages[2].transform.parent.GetSiblingIndex() + 1
                     );
 
-                    abdomenicon.Add(infectIcon.gameObject);
+                    iconList.Add(infectIcon.gameObject);
 
                     Plugin.Log.LogInfo("Added icon!");
                     Plugin.Log.LogInfo("You now have " + std.Key.ToString() + " :3");

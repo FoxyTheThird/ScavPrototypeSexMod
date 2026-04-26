@@ -19,6 +19,7 @@ namespace ScavPrototypeSexMod
         public static float Horniness = 100f;
         public static float Hardness = 1f;
         public static float durHorny = 0f;
+        public static bool havingSex = false;
 
         public static bool WearingCondom = false;
         public static bool CondomInInventory = false;
@@ -69,6 +70,8 @@ namespace ScavPrototypeSexMod
         public static PlayerCamera pc;
         public static WoundView wv = null;
         public static Body bod;
+        public static Vomiter vom;
+        public static FluidManager fm;
 
         // Sprite replacements
         public static Sprite limbtemp = FileLoader.LoadEmbeddedSprite("ScavPrototypeSexMod.Assets.limbtemplate.png", 125);
@@ -101,6 +104,9 @@ namespace ScavPrototypeSexMod
         };
 
         public static string[] ASSET_NAMES;
+
+        // Particles...
+        public static GameObject cpart = null;
 
         // My BS
         public static bool funnystuff = true;

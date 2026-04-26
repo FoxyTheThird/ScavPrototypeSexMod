@@ -17,7 +17,7 @@
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
-    <OutputPath>C:\Users\Ricardo Hernandez\Downloads\Casualities Unknown\CasualtiesUnknownDemo\BepInEx\plugins</OutputPath>
+    <OutputPath>C:\Program Files (x86)\Steam\steamapps\common\Casualties Unknown Demo\BepInEx\plugins</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>5</WarningLevel>
@@ -115,6 +115,7 @@
     <Compile Include="Managers\LiquidManager.cs" />
     <Compile Include="Managers\MoodleManager.cs" />
     <Compile Include="Managers\NetPlayManager.cs" />
+    <Compile Include="Managers\ParticleManager.cs" />
     <Compile Include="Managers\SexManager.cs" />
     <Compile Include="Managers\STDManager.cs" />
     <Compile Include="Managers\UIManager.cs" />
@@ -201,6 +202,10 @@
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Assets\Animations\animations.bundle" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Assets\cummies-vom.png" />
+    <EmbeddedResource Include="Assets\cummies.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

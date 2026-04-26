@@ -1,21 +1,22 @@
 ﻿using HarmonyLib;
 using ScavPrototypeSexMod.Managers;
+using ScavSexMod.Helpers;
 using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Net;
+using System.Reflection;
+using System.Security.Policy;
 using System.Text;
 using System.Threading.Tasks;
-using TMPro;
-using UnityEngine.UI;
-using UnityEngine;
-using ScavSexMod.Helpers;
-using System.Security.Policy;
-using System.Reflection;
-using System.Collections;
-using System.IO;
-using System.Net;
-using UnityEngine.Profiling;
 using System.Xml.Serialization;
+using TMPro;
+using UnityEngine;
+using UnityEngine.Events;
+using UnityEngine.Profiling;
+using UnityEngine.UI;
 
 namespace ScavPrototypeSexMod.Patches
 {
@@ -27,14 +28,19 @@ namespace ScavPrototypeSexMod.Patches
         public static AudioSource audSource;
         private static AudioClip _customDeathClip;
         private static AudioClip _silence;
-        private static bool _initialized;
+        public static bool _initialized;
         private static float _currentVolume = 0f;
-        private static bool _startedPlaying = false;
+        public static bool _startedPlaying = false;
 
         [HarmonyPatch("Update")]
         [HarmonyPostfix]
         public static void ReplaceDeathMusic(MusicManager __instance)
         {
+            if (__instance == null)
+            {
+                Plugin.Log.LogError("__instance is null.");
+            };
+
             if (!_initialized)
             {
                 _playedDeadField = typeof(MusicManager).GetField("playedDead", BindingFlags.Instance | BindingFlags.NonPublic);
@@ -52,7 +58,14 @@ namespace ScavPrototypeSexMod.Patches
                 }
 
                 GameObject audSourceGO = new GameObject("Death");
-                audSource = audSourceGO.AddComponent<AudioSource>(); 
+                audSource = audSourceGO.AddComponent<AudioSource>();
+
+                if (audSource == null)
+                {
+                    Plugin.Log.LogError("Audio Source is null.");
+                    _initialized = false;
+                    return;
+                }
 
                 audSource.bypassReverbZones = true;
                 audSource.dopplerLevel = 0f;
@@ -93,7 +106,7 @@ namespace ScavPrototypeSexMod.Patches
             }
             else
             {
-                if (_startedPlaying)
+                if (audSource != null && _startedPlaying)
                 {
                     audSource.Stop();
                     audSource.volume = 0f;
@@ -133,27 +146,37 @@ namespace ScavPrototypeSexMod.Patches
         [HarmonyPostfix]
         public static void PlayerCamera_ToggleWoundView_Postfix(PlayerCamera __instance)
         {
-            __instance.StartCoroutine(UIManager.InitSexModWoundView(__instance));
+            if (__instance?.woundView == null) return;
+            if (!__instance.woundView.gameObject.activeSelf) return;
+
+            __instance.StartCoroutine(UIManager.InitSexModWoundView(__instance.woundView));
         }
 
         [HarmonyPatch("Update")]
         [HarmonyPostfix]
         public static void PlayerCamera_Update_Postfix(PlayerCamera __instance)
         {
-            if (SharedState.wv && SharedState.wv.workoutList.activeSelf)
+            if (__instance != null)
             {
-                if (!SharedState.masturbateButton)
+                if (SharedState.wv && SharedState.wv.workoutList.activeSelf)
                 {
-                    __instance.StartCoroutine(UIManager.InitSexModWorkoutList(__instance));
+                    if (!SharedState.masturbateButton)
+                    {
+                        __instance.StartCoroutine(UIManager.InitSexModWorkoutList(__instance));
+                    }
+                    else if (SharedState.masturbateButton && SharedState.masturbateButton.activeSelf == false)
+                    {
+                        SharedState.masturbateButton.SetActive(true);
+                    }
                 }
-                else if (SharedState.masturbateButton && SharedState.masturbateButton.activeSelf == false)
+                else if (!__instance.gameObject.activeSelf && SharedState.masturbateButton && SharedState.masturbateButton.activeSelf)
                 {
-                    SharedState.masturbateButton.SetActive(true);
+                    SharedState.masturbateButton.SetActive(false);
                 }
             }
-            else if (!__instance.gameObject.activeSelf && SharedState.masturbateButton && SharedState.masturbateButton.activeSelf)
+            else
             {
-                SharedState.masturbateButton.SetActive(false);
+                Plugin.Log.LogError("PlayerCamera is Null in the Postfix Patch! Uh-oh!");
             }
         }
 
@@ -240,6 +263,8 @@ namespace ScavPrototypeSexMod.Patches
             }
         }
 
+        public static ParticleSystem partsys = null;
+
         [HarmonyPatch(typeof(PlayerCamera), "Update")]
         public static class PlayerCamera_Update_Patch
         {
@@ -252,9 +277,52 @@ namespace ScavPrototypeSexMod.Patches
                 }
 
                 STDManager.UpdateSTD();
+
+                // For the particles
+                if (!SharedState.cpart) return;
+
+                if (partsys == null)
+                {
+                    partsys = SharedState.cpart.GetComponent<ParticleSystem>();
+                }
+
+                var vel = partsys.velocityOverLifetime;
+
+                float target = (__instance.body.transform.localScale.x >= 0f) ? 30f : -30f;
+
+                vel.x = new ParticleSystem.MinMaxCurve(target);
+
+                partsys.transform.position = __instance.body.limbs[9].transform.position;
             }
         }
     }
+
+    [HarmonyPatch(typeof(Vomiter), "Update")]
+    public static class Vomiter_Awake_Patch
+    {
+        [HarmonyPostfix]
+        public static void Postfix(Vomiter __instance)
+        {
+            if (!SharedState.vom)
+            {
+                SharedState.vom = __instance;
+            }
+        }
+    }
+
+    [HarmonyPatch(typeof(FluidManager), "Start")]
+    public static class FM_Start_Patch
+    {
+        [HarmonyPostfix]
+        public static void Postfix(FluidManager __instance)
+        {
+            if (!SharedState.fm)
+            {
+                SharedState.fm = __instance;
+            }
+        }
+    }
+
 
     // Adding a body part to the body before it grabs a list of body parts.
     /*[HarmonyPatch(typeof(Body), "Awake")]
@@ -527,7 +595,7 @@ namespace ScavPrototypeSexMod.Patches
             [HarmonyPostfix]
             public static void AddWoundView(WoundView __instance)
             {
-                if (SharedState.wv == null)
+                if (SharedState.wv == null && __instance.gameObject.activeSelf)
                 {
                     SharedState.wv = __instance;
                 }

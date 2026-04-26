@@ -44,18 +44,22 @@ namespace ScavPrototypeSexMod.Managers
         };
         Color[] liquidColors = { Color.cyan, Color.white, Color.yellow, Color.gray };
 
-        float[] liquidCapacities = { 500f, 100f, 250f, 10f };
+        public float[] liquidCapacities = { 500f, 100f, 250f, 10f };
 
         float[] liquidvalues = { 50f, 30f, 5f, 1f };
 
-        public Item lube = ItemManager.AddItem("mfs.lube", "ScavPrototypeSexMod.Assets.kyjellylube.png", new Vector2(1.5f, 1.5f), 175, 200);
+        public Item lube;
+
+        public WaterContainerItem container;
+
+        public List<LiquidStack> lubeContents;
 
         public void RegisterFluids()
         {
             if (lube == null)
                 lube = ItemManager.AddItem("mfs.lube", "ScavPrototypeSexMod.Assets.kyjellylube.png", new Vector2(1.5f, 1.5f), 175, 200);
 
-            List<LiquidStack> lubeContents = new List<LiquidStack>();
+            lubeContents = new List<LiquidStack>();
 
             for (int i = 0; i < liquids.Count; i++)
             {
@@ -74,16 +78,16 @@ namespace ScavPrototypeSexMod.Managers
                 {
                     autoFill = false,
                     capacity = liquidCapacities[i],
-                    defaultContents = new List<LiquidStack> { liquidStack }
+                    defaultContents = new List<LiquidStack>(lubeContents)
                 };
 
-                // Assign info safely
+                // Assign info for the liquids
                 liquids[i] = ItemManager.AddItemInfo(
                     liquidItem,
                     name: template.fullName, // unique key per liquid
                     tags: "",
                     category: "water",
-                    qualities: template.qualities?.FirstOrDefault()?.id ?? "utility",
+                    qualities: null,
                     desiredWearLimb: null,
                     wearSlotID: null,
                     description: template.description ?? "",
@@ -110,11 +114,6 @@ namespace ScavPrototypeSexMod.Managers
                     Liquids.Registry.Add(liquidType.localeName, liquidType);
                 }
             }
-
-            var container = lube.gameObject.GetComponent<WaterContainerItem>();
-            if (container == null)
-                container = lube.gameObject.AddComponent<WaterContainerItem>();
-            container.stack = lubeContents;
         }
     }
 }
