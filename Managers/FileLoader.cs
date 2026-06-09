@@ -11,6 +11,7 @@ using System.Security.Cryptography;
 using TMPro;
 using Newtonsoft.Json;
 using ScavPrototypeSexMod;
+using UnityEngine.Animations;
 
 namespace ScavSexMod.Helpers
 {
@@ -294,6 +295,25 @@ namespace ScavSexMod.Helpers
                 result = key;
             }
             return result;
+        }
+    }
+
+    public static class ObjectFinder
+    {
+        public static Transform FindRecursive(Transform parent, string name)
+        {
+            foreach (Transform child in parent)
+            {
+                if (child.name == name)
+                    return child;
+
+                var result = FindRecursive(child, name);
+
+                if (result != null)
+                    return result;
+            }
+
+            return null;
         }
     }
 }

@@ -26,8 +26,8 @@ namespace ScavPrototypeSexMod.Managers
             }
             SharedState.CondomInInventory = false;
             SharedState.WearingCondom = false;
-            SharedState.Horniness = 100f;
-            SharedState.Hardness = 1f;
+            SharedState.Horniness = 0f;
+            SharedState.Hardness = 0f;
         }
 
         public static void PickSTD()
@@ -220,7 +220,7 @@ namespace ScavPrototypeSexMod.Managers
                 }
 
                 // Figure out why the radial inventory menu doesn't close when the trade menu closes.
-                if (SharedState.CurrentGender != SharedState.Gender.NonBinary)
+                if (SharedState.CurrentGender != Gender.NonBinary)
                 {
                     Plugin.Log.LogInfo("Is the correct gender for this.");
 
@@ -256,7 +256,7 @@ namespace ScavPrototypeSexMod.Managers
                     {
                         SharedState.Horniness = 0f;
                         SharedState.CondomInInventory = false;
-                        if (SharedState.CurrentGender == SharedState.Gender.Male || SharedState.CurrentGender == SharedState.Gender.Intersex)
+                        if (SharedState.CurrentGender == Gender.Male || SharedState.CurrentGender == Gender.Intersex)
                         {
                             SharedState.Hardness = 0f;
                             SharedState.WearingCondom = false;
@@ -413,32 +413,29 @@ namespace ScavPrototypeSexMod.Managers
             {
                 cam.body.talker.Talk("F- fuuck!!~", null, true, false);
 
+                cam.ToggleWoundView(true);
+
                 if (SharedState.cpart == null)
                 {
                     SharedState.cpart = ParticleManager.makePiss();
                 }
 
-                /*var ps = SharedState.cpart.GetComponent<ParticleSystem>();
-
-                Debug.Log("Emission: " + ps.emission.rateOverTime.constant);
-                Debug.Log("Particles alive: " + ps.particleCount);
-                Debug.Log("MaxParticles: " + ps.main.maxParticles);
-                Debug.Log("StartSize: " + ps.main.startSize.constant);
-                Debug.Log("IsPlaying: " + ps.isPlaying);*/
-
                 // Maybe use a havingSex bool for a more robust check???
+                var ps = SharedState.cpart.GetComponent<ParticleSystem>();
+                var em = ps.emission;
+
                 if (cam.body.bodyAnimator.GetBool("exercising"))
                 {
                     //SharedState.Horniness = Mathf.Max(SharedState.Horniness - (3f - SharedState.Horniness / 40f) * 1f * Time.deltaTime, 0f);
                     //cam.body.bodyAnimator.SetFloat("WorkoutSpeed", 1f + Mathf.Clamp01((SharedState.Horniness / 40f)) * (2.5f - 1f));
                     //cam.body.armsAnimator.SetFloat("WorkoutSpeed", 1f + Mathf.Clamp01((SharedState.Horniness / 40f)) * (2.5f - 1f));
 
-                    SharedState.cpart.GetComponent<ParticleSystem>().Emit(20);
+                    em.rateOverTime = 15f;
                     SharedState.cpart.transform.position = cam.transform.position;
                 }
                 else
                 {
-                    SharedState.cpart.GetComponent<ParticleSystem>().Emit(40);
+                    em.rateOverTime = 25f;
                     SharedState.cpart.transform.position = cam.transform.position;
                 }
             }

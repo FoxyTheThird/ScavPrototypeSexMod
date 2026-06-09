@@ -10,6 +10,7 @@ using ScavSexMod.Helpers;
 using TMPro;
 using System.ComponentModel;
 using Newtonsoft.Json.Linq;
+using System.Reflection.Emit;
 
 namespace ScavPrototypeSexMod.Managers
 {
@@ -19,25 +20,14 @@ namespace ScavPrototypeSexMod.Managers
         {
             Plugin.Log.LogInfo("UIManager Initialized");
         }
-        
-        private static readonly string[] Options =
-        {
-            "Male",
-            "Female",
-            "Intersex",
-            "Non-Binary"
-        };
 
-        private const string PREF_KEY = "GenderSelection";
-
-        // Creates the gender radio check boxes on the main menu
-        // Now that the Gender Sex Changer is inside the run settings box, make it look pretty!
-        public static void CreateGenderRadios()
+        // Skeleton for settings menu for rn
+        public static void CreateSettingsMenu()
         {
-            var canvas = GameObject.Find("Canvas").transform.Find("RunSettings");
+            var canvas = GameObject.Find("Canvas").transform;
             if (canvas == null) return;
 
-            var root = new GameObject("GenderOptions", typeof(RectTransform));
+            var root = new GameObject("KinkOptions", typeof(RectTransform));
             root.transform.SetParent(canvas, false);
 
             var rect = root.GetComponent<RectTransform>();
@@ -50,81 +40,8 @@ namespace ScavPrototypeSexMod.Managers
             layout.spacing = 8;
             layout.childAlignment = TextAnchor.UpperLeft;
 
-            var group = root.AddComponent<ToggleGroup>();
-            group.allowSwitchOff = false;
-
-            int savedIndex = PlayerPrefs.GetInt(PREF_KEY, 0);
-            SharedState.CurrentGender = (SharedState.Gender)savedIndex;
-
-            for (int i = 0; i < Options.Length; i++)
-            {
-                int index = i;
-
-                var toggleGO = new GameObject(Options[i], typeof(RectTransform), typeof(Image), typeof(Toggle), typeof(HorizontalLayoutGroup));
-
-                toggleGO.transform.SetParent(root.transform, false);
-
-                var rowRect = toggleGO.GetComponent<RectTransform>();
-                rowRect.sizeDelta = new Vector2(110, 26);
-
-                var rowImage = toggleGO.GetComponent<Image>();
-                rowImage.color = new Color(0, 0, 0, 0);
-
-                var hLayout = toggleGO.GetComponent<HorizontalLayoutGroup>();
-                hLayout.spacing = 6;
-                hLayout.childAlignment = TextAnchor.MiddleLeft;
-                hLayout.childControlHeight = false;
-                hLayout.childControlWidth = false;
-                hLayout.childForceExpandWidth = false;
-
-                var toggle = toggleGO.GetComponent<Toggle>();
-                toggle.group = group;
-
-                var box = new GameObject("Box", typeof(RectTransform), typeof(Image));
-                box.transform.SetParent(toggleGO.transform, false);
-
-                var boxRect = box.GetComponent<RectTransform>();
-                boxRect.sizeDelta = new Vector2(18, 18);
-
-                var boxImage = box.GetComponent<Image>();
-                boxImage.color = new Color(0.8f, 0.8f, 0.8f, 1f);
-
-                toggle.targetGraphic = boxImage;
-
-                var check = new GameObject("Checkmark", typeof(RectTransform), typeof(Image));
-                check.transform.SetParent(box.transform, false);
-
-                var checkRect = check.GetComponent<RectTransform>();
-                checkRect.anchorMin = Vector2.zero;
-                checkRect.anchorMax = Vector2.one;
-                checkRect.offsetMin = Vector2.zero;
-                checkRect.offsetMax = Vector2.zero;
-
-                var checkImage = check.GetComponent<Image>();
-                checkImage.color = Color.green;
-
-                toggle.graphic = checkImage;
-
-                var labelGO = new GameObject("Label", typeof(RectTransform), typeof(TextMeshProUGUI));
-                labelGO.transform.SetParent(toggleGO.transform, false);
-
-                var text = labelGO.GetComponent<TextMeshProUGUI>();
-                text.text = Options[i];
-                text.fontSize = 22;
-                text.alignment = TextAlignmentOptions.MidlineLeft;
-
-                toggle.isOn = index == savedIndex;
-
-                toggle.onValueChanged.AddListener(isOn =>
-                {
-                    if (!isOn) return;
-
-                    SharedState.CurrentGender = (SharedState.Gender)index;
-                    Plugin.Log.LogInfo(SharedState.CurrentGender.ToString());
-                    PlayerPrefs.SetInt(PREF_KEY, index);
-                    PlayerPrefs.Save();
-                });
-            }
+            // Layout of kink options will go as such
+            // Kink - On / Off (Green when On, Red when off, show a switch flipping anim.
         }
 
         // Creates the Sex Button on the trader menu
@@ -134,7 +51,7 @@ namespace ScavPrototypeSexMod.Managers
 
             GameObject tradeMenu = cam.tradeMenu.gameObject;
 
-            if (tradeMenu.transform.Find("SexModImage") != null)
+            if (tradeMenu.transform.Find("Fuck") != null)
                 yield break;
 
             // Create object
@@ -145,9 +62,14 @@ namespace ScavPrototypeSexMod.Managers
             img.sprite = FileLoader.LoadEmbeddedSprite("ScavPrototypeSexMod.Assets.sex.png");
 
             Button btn = imgGO.AddComponent<Button>();
+            UITooltip tooltip = imgGO.AddComponent<UITooltip>();
             btn.image = img;
             btn.interactable = true;
             btn.enabled = true;
+            tooltip.skipLocale = true;
+            tooltip.name = "Fuck";
+            tooltip.tipDesc = "Have sex with the trader as long as your reputation with them is high enough. Raises happiness and lowers Horniness.";
+            tooltip.enabled = true;
 
             RectTransform rt = img.rectTransform;
             // Putting the pivot point directly in the center of the button
@@ -156,7 +78,7 @@ namespace ScavPrototypeSexMod.Managers
             rt.pivot = new Vector2(0.5f, 0.5f);
 
             // offset relative to radialMenu
-            rt.anchoredPosition = new Vector2(100f, -170f);
+            rt.anchoredPosition = new Vector2(63f, -245f);
             rt.sizeDelta = new Vector2(128, 128);
             rt.localScale = Vector3.one;
 
@@ -173,7 +95,8 @@ namespace ScavPrototypeSexMod.Managers
             // Gender stuffs
             if (SharedState.genderRoot == null)
             {
-                RectTransform GenderRT = woundView.transform.Find("StatMenu").GetComponent<RectTransform>();
+                var statTrans = ObjectFinder.FindRecursive(woundView.transform, "StatMenu");
+                RectTransform GenderRT = statTrans.GetComponent<RectTransform>();
 
                 GameObject GenderGO = new GameObject("GenRoot");
                 SharedState.genderRoot = GenderGO;
@@ -191,39 +114,35 @@ namespace ScavPrototypeSexMod.Managers
                 UITooltip tooltip = genimg.gameObject.AddComponent<UITooltip>();
                 tooltip.skipLocale = true;
                 tooltip.tipName = "Gender";
+                imgRT.anchoredPosition = new Vector2(-235f, -350f);
 
                 switch (SharedState.CurrentGender)
                 {
-                    case SharedState.Gender.Male:
+                    case Gender.Male:
                         imgRT.sizeDelta = new Vector2(250, 250);
-                        imgRT.anchoredPosition = new Vector2(-195f, -315f);
                         imgRT.localScale = new Vector3(0.15f, 0.15f, 1f);
                         tooltip.tipDesc = "You are a " + SharedState.CurrentGender.ToString() + ".";
                         break;
-                    case SharedState.Gender.Female:
+                    case Gender.Female:
                         imgRT.sizeDelta = new Vector2(250, 250);
-                        imgRT.anchoredPosition = new Vector2(-185f, -310f);
                         imgRT.localScale = new Vector3(0.20f, 0.20f, 1f);
                         tooltip.tipDesc = "You are a " + SharedState.CurrentGender.ToString() + ".";
                         break;
-                    case SharedState.Gender.Intersex:
+                    case Gender.Intersex:
                         imgRT.sizeDelta = new Vector2(250, 340);
-                        imgRT.anchoredPosition = new Vector2(-195f, -310f);
                         imgRT.localScale = new Vector3(0.13f, 0.13f, 1f);
                         tooltip.tipDesc = "You are " + SharedState.CurrentGender.ToString() + ".";
                         break;
-                    case SharedState.Gender.NonBinary:
+                    case Gender.NonBinary:
                         imgRT.sizeDelta = new Vector2(142, 250);
-                        imgRT.anchoredPosition = new Vector2(-200f, -315f);
                         imgRT.localScale = new Vector3(0.15f, 0.15f, 1f);
                         tooltip.tipDesc = "You are " + SharedState.CurrentGender.ToString() + ".";
                         break;
                 }
             }
 
-
             // For Horny text
-            if (SharedState.CurrentGender != SharedState.Gender.NonBinary)
+            if (SharedState.CurrentGender != Gender.NonBinary)
             {
                 if (SharedState.horninessRoot == null)
                 {
@@ -277,7 +196,7 @@ namespace ScavPrototypeSexMod.Managers
                     imgRT.anchorMax = new Vector2(1f, 1f);
                     imgRT.pivot = new Vector2(1f, 1f);
 
-                    imgRT.anchoredPosition = new Vector2(-30f, -170f);
+                    imgRT.anchoredPosition = new Vector2(-115f, -350f);
                     imgRT.sizeDelta = new Vector2(154f, 50f);
                     imgRT.localScale = new Vector3(0.67f, 0.67f, 1f);
 
@@ -302,11 +221,13 @@ namespace ScavPrototypeSexMod.Managers
         {
             yield return null;
 
-            RectTransform rootRT = cam.woundView.gameObject.transform.Find("WorkoutsList").GetComponent<RectTransform>();
+            var workoutTrans = ObjectFinder.FindRecursive(cam.woundView.gameObject.transform, "WorkoutsList");
+            RectTransform rootRT = workoutTrans.GetComponent<RectTransform>();
 
-            TextMeshProUGUI textmesh = cam.woundView.gameObject.transform.Find("WorkoutsList").Find("Plank").Find("Text (TMP)").GetComponent<TextMeshProUGUI>();
+            var textTrans = ObjectFinder.FindRecursive(cam.woundView.transform, "Text (TMP)");
+            TextMeshProUGUI textmesh = textTrans.GetComponent<TextMeshProUGUI>();
 
-            if (SharedState.CurrentGender == SharedState.Gender.NonBinary)
+            if (SharedState.CurrentGender == Gender.NonBinary)
                 yield break;
 
             if (SharedState.masturbateButton != null)

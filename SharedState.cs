@@ -10,12 +10,38 @@ using UnityEngine.UI;
 
 namespace ScavPrototypeSexMod
 {
+    public enum Gender
+    {
+        Male,
+        Female,
+        Intersex,
+        NonBinary
+    }
+
     struct SharedState
     {
         public static Dictionary<string, GameObject> ModPrefabs = new Dictionary<string, GameObject>();
 
         public static TraderScript curTrader;
 
+        public const string PREF_KEY = "GenderSelection";
+        public static int savedIndex = 3;
+
+        // Implement this in settings menus on main menu and in run
+        // Use sharedprefs to save the values. Just like how you did with gender.
+        public static Dictionary<string, bool> kinkOptions = new Dictionary<string, bool>
+        {
+            { "Watersports", false },
+            { "Noncon", false },
+            { "Pregnacy", false },
+            // With the animals in cas unk, technically.
+            { "Bestiality", false },
+            { "STDs", false},
+        };
+
+        // Add Dicktypes eventually, when u get those dick sprites.
+
+        // Body variables
         public static float Horniness = 100f;
         public static float Hardness = 1f;
         public static float durHorny = 0f;
@@ -26,6 +52,8 @@ namespace ScavPrototypeSexMod
         public static float breakChance;
         public static bool HasSTD = false;
         public static float infectprog = 0f;
+
+        public static Gender CurrentGender = Gender.NonBinary;
 
         public static Dictionary<string, bool> stdTypes = new Dictionary<string, bool>()
         {
@@ -41,14 +69,6 @@ namespace ScavPrototypeSexMod
         public static float TraderReputation = 0f;
         public static bool IsConstructing;
 
-        public enum Gender
-        {
-            Male,
-            Female,
-            Intersex,
-            NonBinary
-        }
-
         public enum MoreWorkoutTypes
         {
             Masturbate
@@ -59,8 +79,7 @@ namespace ScavPrototypeSexMod
         public static Coroutine hCoroutine = null;
         public static Coroutine mCoroutine = null;
 
-        public static Gender CurrentGender = Gender.NonBinary;
-
+        // Custom gameobjects
         public static TextMeshProUGUI horninessText;
         public static GameObject horninessRoot;
         public static GameObject genderRoot;
@@ -72,6 +91,7 @@ namespace ScavPrototypeSexMod
         public static Body bod;
         public static Vomiter vom;
         public static FluidManager fm;
+        public static PreRunScript prs;
 
         // Sprite replacements
         public static Sprite limbtemp = FileLoader.LoadEmbeddedSprite("ScavPrototypeSexMod.Assets.limbtemplate.png", 125);

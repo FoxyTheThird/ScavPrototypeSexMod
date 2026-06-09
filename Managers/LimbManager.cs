@@ -57,10 +57,10 @@ namespace ScavPrototypeSexMod.Managers
 
             GetLimbs(bod);
             GetLimbSprites(bod);
-            RegisterLimbs(bod);
+            //RegisterLimbs(bod);
         }
 
-        /*public static IEnumerator RegisterLimbs(Body bod)
+        /*public static IEnumerator CloneLimb(Body bod)
         {
             yield return null; // wait one frame so Body is fully initialized
 
@@ -127,34 +127,35 @@ namespace ScavPrototypeSexMod.Managers
             var col = limbGO.AddComponent<BoxCollider2D>();
             var rb = limbGO.AddComponent<Rigidbody2D>();
             var hj = limbGO.AddComponent<HingeJoint2D>();
+            var fj = limbGO.AddComponent<FixedJoint2D>();
             var ps = limbGO.AddComponent<ParticleSystem>();
 
             // Setup SpriteRenderer
             sr.sprite = SharedState.limbtemp;
             sr.sortingLayerName = "Body";
             sr.sortingOrder = 200;
+            sr.material = WorldGeneration.world.defaultMat;
 
             // BoxCollider
-            col.size = new Vector2(0.18f, 0.18f);
+            col.size = new Vector2(1f, 1f);
             col.enabled = true;
 
             // Rigidbody2D
-            rb.mass = 0.15f;
+            /*rb.mass = 1f;
             rb.angularDrag = 0.05f;
-            rb.drag = 0.05f;
+            rb.gravityScale = 1f;
             rb.interpolation = RigidbodyInterpolation2D.Interpolate;
             rb.collisionDetectionMode = CollisionDetectionMode2D.Continuous;
-            rb.sleepMode = RigidbodySleepMode2D.NeverSleep;
-            rb.constraints = RigidbodyConstraints2D.None;
+            rb.sleepMode = RigidbodySleepMode2D.StartAwake;*/
 
             SharedState.IsConstructing = true;
 
             // Add Limb component
             Limb limb = limbGO.AddComponent<Limb>();
             limb.body = bod;
-            limb.rb = rb;
+            //limb.rb = rb;
             limb.joint = hj;
-            limb.baseMass = rb.mass;
+            //limb.baseMass = rb.mass;
 
             // Run the original private Awake to initialize all internal fields safely
             var awakeMethod = typeof(Limb).GetMethod("Awake", BindingFlags.Instance | BindingFlags.NonPublic);
@@ -188,32 +189,26 @@ namespace ScavPrototypeSexMod.Managers
             // Health and bleeding defaults
             limb.skinHealth = 100f;
             limb.muscleHealth = 100f;
-            limb.bleedSpeedMult = 1f;
+            limb.fullName = "Dick";
+            limb.shortName = "Dick";
 
             // Configure HingeJoint
             hj.tag = "Player";
             hj.name = "Dick";
-            hj.connectedBody = abdomen.rb;
-            hj.autoConfigureConnectedAnchor = false;
-            hj.anchor = new Vector2(0f, 0.09f);
-            hj.connectedAnchor = new Vector2(0f, -0.05f);
+            hj.connectedBody = bod.limbs[2].rb;
+            hj.autoConfigureConnectedAnchor = true;
+            hj.anchor = new Vector2(0f, 0f);
             JointAngleLimits2D lim = new JointAngleLimits2D();
-            lim.min = -75f;
-            lim.max = 75f;
+            lim.min = 90f;
+            lim.max = -90f;
             hj.limits = lim;
             hj.useLimits = true;
 
             // Connect to abdomen
-            limb.connectedLimbs = new Limb[] { abdomen };
+            bod.limbs[2].connectedLimbs.AddItem(limb);
+            limb.connectedLimbs.AddItem(bod.limbs[2]);
 
-            // Add to the body limbs array safely
-            /*Limb[] oldLimbs = bod.limbs ?? new Limb[0];
-            Limb[] newLimbs = new Limb[oldLimbs.Length + 1];
-            Array.Copy(oldLimbs, newLimbs, oldLimbs.Length);
-            newLimbs[newLimbs.Length - 1] = limb;
-            bod.limbs = newLimbs;*/
-
-            rb.simulated = true;
+            //rb.simulated = true;
             limbGO.SetActive(true);
             SharedState.IsConstructing = false;
 

@@ -190,11 +190,11 @@ namespace ScavPrototypeSexMod.Patches
             {
                 // stop all audio
                 if (__instance.body.inWater)
-                    __instance.deathScreen.sprite = SharedState.expieWater;
+                    __instance.deathScreenSprites[2] = SharedState.expieWater;
                 else if (__instance.body.totalBleedSpeed > 0.02f)
-                    __instance.deathScreen.sprite = SharedState.expieJoy;
+                    __instance.deathScreenSprites[1] = SharedState.expieJoy;
                 else
-                    __instance.deathScreen.sprite = SharedState.expieThink;
+                    __instance.deathScreenSprites[0] = SharedState.expieThink;
             }
         }
 
@@ -325,7 +325,7 @@ namespace ScavPrototypeSexMod.Patches
 
 
     // Adding a body part to the body before it grabs a list of body parts.
-    /*[HarmonyPatch(typeof(Body), "Awake")]
+    [HarmonyPatch(typeof(Body), "Awake")]
     public static class Body_Awake_Patch
     {
         [HarmonyPostfix]
@@ -356,7 +356,7 @@ namespace ScavPrototypeSexMod.Patches
 
             return true;
         }
-    }*/
+    }
 
     // Instead of adding limbs atm just replace sprites on body cuz that's easier.
     [HarmonyPatch(typeof(Body))]
@@ -396,19 +396,19 @@ namespace ScavPrototypeSexMod.Patches
 
             switch (SharedState.CurrentGender)
             {
-                case SharedState.Gender.Female:
+                case Gender.Female:
                     SharedState.ASSET_NAMES[0] = "expieboobs.png";
                     SharedState.ASSET_NAMES[1] = "expiepussy.png";
                     break;
-                case SharedState.Gender.Male:
+                case Gender.Male:
                     SharedState.ASSET_NAMES[0] = "experimentUpTorso.png";
                     SharedState.ASSET_NAMES[1] = "experimentDownTorso.png";
                     break;
-                case SharedState.Gender.Intersex:
+                case Gender.Intersex:
                     SharedState.ASSET_NAMES[0] = "experimentUpTorso.png";
                     SharedState.ASSET_NAMES[1] = "experimentDownTorso.png";
                     break;
-                case SharedState.Gender.NonBinary:
+                case Gender.NonBinary:
                     SharedState.ASSET_NAMES[0] = "experimentUpTorso.png";
                     SharedState.ASSET_NAMES[1] = "experimentDownTorso.png";
                     break;
@@ -449,16 +449,16 @@ namespace ScavPrototypeSexMod.Patches
             {
                 switch (SharedState.CurrentGender)
                 {
-                    case SharedState.Gender.Female:
+                    case Gender.Female:
                         SharedState.ASSET_NAMES[0] = "expieboobs.png";
                         break;
-                    case SharedState.Gender.Male:
+                    case Gender.Male:
                         SharedState.ASSET_NAMES[0] = "experimentUpTorso.png";
                         break;
-                    case SharedState.Gender.Intersex:
+                    case Gender.Intersex:
                         SharedState.ASSET_NAMES[0] = "experimentUpTorso.png";
                         break;
-                    case SharedState.Gender.NonBinary:
+                    case Gender.NonBinary:
                         SharedState.ASSET_NAMES[0] = "experimentUpTorso.png";
                         break;
                 }
@@ -510,10 +510,107 @@ namespace ScavPrototypeSexMod.Patches
     [HarmonyPatch(typeof(PreRunScript), "Start")]
     public class MenuPrefs
     {
-        [HarmonyPostfix]
-        public static void PreRunScript_Start_Posfix()
+        private static bool injected;
+
+        public static void Prefix()
         {
-            UIManager.CreateGenderRadios();
+            if (!injected)
+            {
+                RunSettings.settingTypes.Insert(0, CreateGender());
+
+                injected = true;
+            }
+        }
+
+        static RunSetting CreateGender()
+        {
+            return new RunSettingDropdown(
+                "Gender",
+                new string[]
+                {
+                "Male",
+                "Female",
+                "Intersex",
+                "NonBinary"
+                }
+            );
+        }
+
+        [HarmonyPostfix]
+        public static void PreRunScript_Start_Postfix(PreRunScript __instance)
+        {
+            if (!SharedState.prs)
+            {
+                SharedState.prs = __instance;
+            }
+
+            var canvas = GameObject.Find("Canvas").transform;
+
+            if (canvas == null) return;
+
+            var content = ObjectFinder.FindRecursive(canvas, "Content");
+
+            var gender = content.GetChild(0).GetChild(1).GetComponent<TMP_Dropdown>();
+
+            if (SharedState.prs.runSettings.TryGetValue("Gender", out var value))
+            {
+                SharedState.savedIndex = (int)value;
+            }
+
+            gender.SetValueWithoutNotify(SharedState.savedIndex);
+            SharedState.CurrentGender = (Gender)SharedState.savedIndex;
+
+            gender.onValueChanged.AddListener(index =>
+            {
+                SharedState.prs.runSettings["Gender"] = index;
+                SharedState.CurrentGender = (Gender)index;
+
+                SharedState.savedIndex = index;
+
+                PlayerPrefs.SetInt("Gender", index);
+                PlayerPrefs.Save();
+
+                Plugin.Log.LogInfo(((Gender)index).ToString());
+            });
+
+            UIManager.CreateSettingsMenu();
+        }
+    }
+
+    [HarmonyPatch(typeof(Locale), "LoadLanguage")]
+    public class Locale_LoadLanguage_Patch
+    {
+        public static void Postfix()
+        {
+            if (Locale.currentLang?.other == null)
+                return;
+
+            AddGenderKeys(Locale.currentLang.other);
+        }
+
+        static void AddGenderKeys(Dictionary<string, string> other)
+        {
+            other["runsetGender"] = "Gender";
+            other["runsetGenderMale"] = "Male";
+            other["runsetGenderFemale"] = "Female";
+            other["runsetGenderIntersex"] = "Intersex";
+            other["runsetGenderNonBinary"] = "NonBinary";
+            other["runsetGenderdsc"] = "Your gender.";
+        }
+    }
+
+    [HarmonyPatch(typeof(RunSettings), "GetPreset")]
+    public class RunSettings_GetPreset_Patch
+    {
+        public static void Postfix(string presetName, ref RunSettingsPreset __result)
+        {
+            if (__result?.presetValues == null)
+                return;
+
+            if (!__result.presetValues.ContainsKey("Gender"))
+            {
+                __result.presetValues["Gender"] = SharedState.savedIndex;
+            }
         }
     }
 
