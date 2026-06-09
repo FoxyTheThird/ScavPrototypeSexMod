@@ -62,6 +62,10 @@ namespace ScavPrototypeSexMod
                 Log.LogInfo("RESOURCE FOUND: " + res);
             }
 
+            // Apply the saved gender.
+            SharedState.savedIndex = PlayerPrefs.GetInt("Gender", 0);
+            SharedState.CurrentGender = (Gender)SharedState.savedIndex;
+
             // Load the locales
             FileLoader.LoadLocale("en");
 

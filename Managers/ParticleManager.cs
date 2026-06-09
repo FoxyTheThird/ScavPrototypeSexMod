@@ -221,7 +221,7 @@ namespace ScavPrototypeSexMod.Managers
 
                 particleCounter++;
 
-                if (particleCounter >= 50)
+                if (particleCounter >= 100)
                 {
                     SharedState.fm.fluid[vec2int.x, vec2int.y] = 1;
                     particleCounter = 0;

@@ -200,7 +200,7 @@ namespace ScavPrototypeSexMod.Managers
 
             while (duration > 0f)
             {
-                body.bloodViscous = Mathf.Max(body.bloodViscous - 0.15f * Time.deltaTime, -25f);
+                body.bloodViscosity = Mathf.Max(body.bloodViscosity - 0.15f * Time.deltaTime, -25f);
                 body.forcedSleepQuality = Body.SleepQuality.Bad;
 
                 if (chance == 49)
@@ -219,7 +219,7 @@ namespace ScavPrototypeSexMod.Managers
                     }
                 }
 
-                if (SharedState.CurrentGender == SharedState.Gender.Male || SharedState.CurrentGender == SharedState.Gender.Intersex)
+                if (SharedState.CurrentGender == Gender.Male || SharedState.CurrentGender == Gender.Intersex)
                 {
                     SharedState.Hardness = Mathf.Min(SharedState.Hardness + Time.deltaTime * 0.25f, 1f);
                     if (SharedState.Hardness > 0.95f)
@@ -228,7 +228,7 @@ namespace ScavPrototypeSexMod.Managers
                         SharedState.Horniness = Mathf.Min(SharedState.Horniness + Time.deltaTime * 1f, 100f);
                     }
                 }
-                else if (SharedState.CurrentGender == SharedState.Gender.Female)
+                else if (SharedState.CurrentGender == Gender.Female)
                 {
                     body.wetness = Mathf.Min(body.wetness + Time.deltaTime * 0.15f, 30f);
                 }
