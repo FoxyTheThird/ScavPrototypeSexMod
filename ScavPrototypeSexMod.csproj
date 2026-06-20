@@ -212,17 +212,5 @@
     <EmbeddedResource Include="Assets\cummies-vom.png" />
     <EmbeddedResource Include="Assets\cummies.png" />
   </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="Assets\UnrelatedAssets\uiBlockNano.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="Assets\UnrelatedAssets\statusArrow.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="Assets\UnrelatedAssets\runsettingbox.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="Assets\UnrelatedAssets\dropdownbox.png" />
-  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
