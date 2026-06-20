@@ -32,7 +32,7 @@ jobs:
           mkdir -p naudiocore
 
       - name: Install Casualities Unknown
-        run: steamcmd +login anonymous +force_install_dir "${{ github.workspace }}/Game" +app_update 4576510 validate +quit
+        run: steamcmd +force_install_dir "${{ github.workspace }}/Game" +login anonymous +app_update 4576510 validate +quit
 
       - name: Extract Libraries From Game
         id: extract
