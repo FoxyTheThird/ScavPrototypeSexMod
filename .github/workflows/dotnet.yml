@@ -18,6 +18,70 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v4
 
+      - name: Install Steamcmd
+        uses: andriivitiv/setup-steamcmd@v1
+
+      - name: Create Folders
+        id: create
+        shell: bash
+        run: |
+          mkdir -p Libraries
+          mkdir -p Game
+          mkdir -p BepInEx
+          mkdir -p naudio
+          mkdir -p naudiocore
+
+      - name: Install Casualities Unknown
+        run: steamcmd +login anonymous +force_install_dir "${{ github.workspace }}/Game" +app_update 4576510 validate +quit
+
+      - name: Extract Libraries From Game
+        id: extract
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          MANAGED_DIR=$(find "${{ github.workspace }}/Game" -type d -path "*/CasualtiesUnknown_Data/Managed" | head -n1)
+
+          if [ -z "$MANAGED_DIR" ]; then
+            echo "Managed folder not found!"
+            exit 1
+          fi
+
+          cp "$MANAGED_DIR"/*.dll "${{ github.workspace }}/Libraries/"
+
+          echo "managed_dir=$MANAGED_DIR" >> "$GITHUB_OUTPUT"
+
+      - name: Install Additional Libraries
+        id: install
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          curl -L -o bepinex.zip https://github.com/BepInEx/BepInEx/releases/download/v5.4.23.5/BepInEx_win_x64_5.4.23.5.zip
+          curl -L -o naudio.nupkg https://www.nuget.org/api/v2/package/NAudio/2.2.1
+          curl -L -o naudio-core.nupkg https://www.nuget.org/api/v2/package/NAudio.Core/2.3.0
+
+          unzip -q bepinex.zip
+          unzip -q naudio.nupkg -d naudio
+          unzip -q naudio-core.nupkg -d naudiocore
+
+          cp BepInEx/BepInEx/core/BepInEx.dll Libraries/
+          cp BepInEx/BepInEx/core/0Harmony.dll Libraries/
+          cp naudio/lib/net472/NAudio.dll Libraries/
+          cp naudio/lib/netstandard2.0/NAudio.Core.dll Libraries/
+
+          echo "Additional Libraries Extracted"
+
+      - name: Cleanup
+        id: cleanup
+        shell: bash
+        run: |
+          rm -rf Game
+          rm -rf BepInEx
+          rm -rf naudio
+          rm -rf naudiocore
+          rm -f bepinex.zip
+
       - name: Check version
         id: check
         shell: bash
